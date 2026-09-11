@@ -10,12 +10,7 @@ permissions:
 
 jobs:
   terraform-checks:
-    name: Terraform Checks
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: terraform
 
     steps:
       - name: Checkout
@@ -24,21 +19,24 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Format Check
+      - name: Terraform Format
+        working-directory: terraform
         run: terraform fmt -check -recursive
 
       - name: Terraform Init
+        working-directory: terraform
         run: terraform init -backend=false
 
       - name: Terraform Validate
+        working-directory: terraform
         run: terraform validate
 
       - name: Terraform Plan
+        working-directory: terraform
         run: terraform plan -lock=false
 
       - name: Install Checkov
         run: pip install checkov
 
-      - name: Checkov Security Scan
-        working-directory: .
+      - name: Checkov Scan
         run: checkov -d terraform --framework terraform
