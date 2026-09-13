@@ -7,9 +7,10 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
-  terraform-checks:
+  terraform-format:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,17 +24,41 @@ jobs:
         working-directory: terraform
         run: terraform fmt -check -recursive
 
+  terraform-validation:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        environment:
+          - dev
+          - staging
+          - prod
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
       - name: Terraform Init
-        working-directory: terraform
+        working-directory: terraform/environments/${{ matrix.environment }}
         run: terraform init -backend=false
 
       - name: Terraform Validate
-        working-directory: terraform
+        working-directory: terraform/environments/${{ matrix.environment }}
         run: terraform validate
 
       - name: Terraform Plan
-        working-directory: terraform
+        working-directory: terraform/environments/${{ matrix.environment }}
         run: terraform plan -lock=false
+
+  checkov:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
 
       - name: Install Checkov
         run: pip install checkov
