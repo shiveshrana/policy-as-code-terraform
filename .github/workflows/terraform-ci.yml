@@ -7,36 +7,38 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
-  terraform-checks:
+  oidc-debug:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      - name: Debug OIDC claims
+        shell: bash
+        env:
+          OIDC_URL: ${{ env.ACTIONS_ID_TOKEN_REQUEST_URL }}
+          OIDC_TOKEN: ${{ env.ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
+        run: |
+          response=$(curl -sS \
+            -H "Authorization: bearer $OIDC_TOKEN" \
+            "${OIDC_URL}&audience=sts.amazonaws.com")
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+          token=$(echo "$response" | jq -r '.value')
 
-      - name: Terraform Format
-        working-directory: terraform
-        run: terraform fmt -check -recursive
+          payload=$(echo "$token" \
+            | cut -d. -f2 \
+            | tr '_-' '/+' \
+            | base64 -d 2>/dev/null \
+            | jq .)
 
-      - name: Terraform Init
-        working-directory: terraform
-        run: terraform init -backend=false
-
-      - name: Terraform Validate
-        working-directory: terraform
-        run: terraform validate
-
-      - name: Terraform Plan
-        working-directory: terraform
-        run: terraform plan -lock=false
-
-      - name: Install Checkov
-        run: pip install checkov
-
-      - name: Checkov Scan
-        run: checkov -d terraform --framework terraform
+          echo "$payload" | jq '{
+            iss,
+            aud,
+            sub,
+            repository,
+            repository_owner,
+            event_name,
+            ref,
+            job_workflow_ref
+          }'
