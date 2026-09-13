@@ -63,3 +63,8 @@ jobs:
       - name: Terraform Plan
         working-directory: terraform/environments/${{ matrix.environment }}
         run: terraform plan -lock=false
+
+      - name: Terraform Apply
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.environment == 'dev'
+        working-directory: terraform/environments/${{ matrix.environment }}
+        run: terraform apply -auto-approve
