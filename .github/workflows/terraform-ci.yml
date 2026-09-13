@@ -48,7 +48,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: terraform/environments/${{ matrix.environment }}
-        run: terraform init -backend=false
+        run: terraform init
 
       - name: Terraform Validate
         working-directory: terraform/environments/${{ matrix.environment }}
