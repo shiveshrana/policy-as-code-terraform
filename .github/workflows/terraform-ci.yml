@@ -41,6 +41,12 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::319279229867:role/GitHubActions-PolicyAsCode
+          aws-region: ap-south-1
+
       - name: Terraform Init
         working-directory: terraform/environments/${{ matrix.environment }}
         run: terraform init -backend=false
