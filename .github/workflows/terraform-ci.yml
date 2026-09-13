@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
         environment:
           - dev
@@ -37,7 +38,9 @@ jobs:
           aws-region: ap-south-1
 
       - name: Verify AWS identity
-        run: aws sts get-caller-identity
+        run: |
+          aws sts get-caller-identity
+          aws configure list
 
       - name: Terraform Format
         working-directory: terraform
@@ -51,17 +54,12 @@ jobs:
         working-directory: terraform/environments/${{ matrix.environment }}
         run: terraform validate
 
-      - name: Verify AWS identity
-        run: |
-          aws sts get-caller-identity
-          aws configure list
+      - name: Install Checkov
+        run: pip install checkov==3.3.17
+
+      - name: Checkov Scan
+        run: checkov -d terraform --framework terraform
 
       - name: Terraform Plan
         working-directory: terraform/environments/${{ matrix.environment }}
         run: terraform plan -lock=false
-
-      - name: Install Checkov
-        run: pip install checkov
-
-      - name: Checkov Scan
-        run: checkov -d terraform --framework terraform
