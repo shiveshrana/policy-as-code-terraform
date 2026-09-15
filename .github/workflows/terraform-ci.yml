@@ -50,6 +50,10 @@ jobs:
         working-directory: terraform/environments/${{ matrix.environment }}
         run: terraform init
 
+      - name: Check Terraform State
+        working-directory: terraform/environments/${{ matrix.environment }}
+        run: terraform state list
+
       - name: Terraform Validate
         working-directory: terraform/environments/${{ matrix.environment }}
         run: terraform validate
