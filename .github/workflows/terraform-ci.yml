@@ -40,7 +40,6 @@ jobs:
       - name: Verify AWS identity
         run: |
           aws sts get-caller-identity
-          aws configure list
 
       - name: Terraform Format
         working-directory: terraform
@@ -54,7 +53,15 @@ jobs:
         working-directory: terraform/environments/${{ matrix.environment }}
         run: |
           echo "Environment: ${{ matrix.environment }}"
+          echo "Terraform state:"
           terraform state list
+
+      - name: Verify Dev S3 Bucket State
+        if: matrix.environment == 'dev'
+        working-directory: terraform/environments/dev
+        run: |
+          terraform state list | grep -q "module.infrastructure.aws_s3_bucket.this"
+          echo "Dev S3 bucket is present in Terraform state."
 
       - name: Terraform Validate
         working-directory: terraform/environments/${{ matrix.environment }}
@@ -72,5 +79,5 @@ jobs:
 
       - name: Terraform Apply
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.environment == 'dev'
-        working-directory: terraform/environments/${{ matrix.environment }}
+        working-directory: terraform/environments/dev
         run: terraform apply -auto-approve
