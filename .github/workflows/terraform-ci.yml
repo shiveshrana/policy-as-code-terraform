@@ -132,11 +132,6 @@ jobs:
         working-directory: terraform/environments/staging
         run: terraform init
 
-      - name: Check Terraform State
-        working-directory: terraform/environments/staging
-        run: |
-          echo "Staging Terraform state:"
-          terraform state list
 
       - name: Terraform Validate
         working-directory: terraform/environments/staging
@@ -191,11 +186,6 @@ jobs:
         working-directory: terraform/environments/prod
         run: terraform init
 
-      - name: Check Terraform State
-        working-directory: terraform/environments/prod
-        run: |
-          echo "Prod Terraform state:"
-          terraform state list
 
       - name: Terraform Validate
         working-directory: terraform/environments/prod
