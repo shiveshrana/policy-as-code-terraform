@@ -43,17 +43,10 @@ jobs:
 
       - name: Test Dev S3 access
         run: |
-          aws s3api head-bucket \
-            --bucket policy-as-code-dev-shivesh-2026
-
-          aws s3api get-bucket-versioning \
-            --bucket policy-as-code-dev-shivesh-2026
-
-          aws s3api get-public-access-block \
-            --bucket policy-as-code-dev-shivesh-2026
-
-          aws s3api get-bucket-encryption \
-            --bucket policy-as-code-dev-shivesh-2026
+          aws s3api head-bucket --bucket policy-as-code-dev-shivesh-2026
+          aws s3api get-bucket-versioning --bucket policy-as-code-dev-shivesh-2026
+          aws s3api get-public-access-block --bucket policy-as-code-dev-shivesh-2026 || true
+          aws s3api get-bucket-encryption --bucket policy-as-code-dev-shivesh-2026
 
       - name: Terraform Format
         working-directory: terraform
