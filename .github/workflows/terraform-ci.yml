@@ -18,9 +18,9 @@ env:
 
 jobs:
 
-  # ============================================================
+  # =========================
   # DEV
-  # ============================================================
+  # =========================
   dev:
     name: Dev
     runs-on: ubuntu-latest
@@ -41,22 +41,9 @@ jobs:
       - name: Verify AWS identity
         run: aws sts get-caller-identity
 
-      - name: Test Dev S3 access
-        run: |
-          aws s3api head-bucket --bucket policy-as-code-dev-shivesh-2026
-          aws s3api get-bucket-versioning --bucket policy-as-code-dev-shivesh-2026
-          aws s3api get-public-access-block --bucket policy-as-code-dev-shivesh-2026 || true
-          aws s3api get-bucket-encryption --bucket policy-as-code-dev-shivesh-2026
-
       - name: Terraform Format
         working-directory: terraform
         run: terraform fmt -check -recursive
-
-      - name: Show Backend Configuration
-        working-directory: terraform/environments/dev
-        run: |
-          echo "Backend configuration:"
-          cat backend.tf
 
       - name: Terraform Init
         working-directory: terraform/environments/dev
@@ -94,9 +81,9 @@ jobs:
         run: terraform apply -auto-approve
 
 
-  # ============================================================
+  # =========================
   # STAGING
-  # ============================================================
+  # =========================
   staging:
     name: Staging
     needs: dev
@@ -122,16 +109,9 @@ jobs:
         working-directory: terraform
         run: terraform fmt -check -recursive
 
-      - name: Show Backend Configuration
-        working-directory: terraform/environments/staging
-        run: |
-          echo "Backend configuration:"
-          cat backend.tf
-
       - name: Terraform Init
         working-directory: terraform/environments/staging
         run: terraform init
-
 
       - name: Terraform Validate
         working-directory: terraform/environments/staging
@@ -148,13 +128,16 @@ jobs:
         run: terraform plan -lock=false
 
 
-  # ============================================================
+  # =========================
   # PROD
-  # ============================================================
+  # =========================
   prod:
     name: Prod
     needs: staging
     runs-on: ubuntu-latest
+
+    environment:
+      name: prod
 
     steps:
       - name: Checkout
@@ -176,16 +159,9 @@ jobs:
         working-directory: terraform
         run: terraform fmt -check -recursive
 
-      - name: Show Backend Configuration
-        working-directory: terraform/environments/prod
-        run: |
-          echo "Backend configuration:"
-          cat backend.tf
-
       - name: Terraform Init
         working-directory: terraform/environments/prod
         run: terraform init
-
 
       - name: Terraform Validate
         working-directory: terraform/environments/prod
@@ -200,3 +176,8 @@ jobs:
       - name: Terraform Plan
         working-directory: terraform/environments/prod
         run: terraform plan -lock=false
+
+      - name: Terraform Apply
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        working-directory: terraform/environments/prod
+        run: terraform apply -auto-approve
