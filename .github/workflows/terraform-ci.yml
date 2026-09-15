@@ -12,17 +12,18 @@ permissions:
   contents: read
   id-token: write
 
-jobs:
-  terraform-checks:
-    runs-on: ubuntu-latest
+env:
+  AWS_REGION: ap-south-1
+  AWS_ROLE: arn:aws:iam::319279229867:role/GitHubActions-PolicyAsCode
 
-    strategy:
-      fail-fast: false
-      matrix:
-        environment:
-          - dev
-          - staging
-          - prod
+jobs:
+
+  # ============================================================
+  # DEV
+  # ============================================================
+  dev:
+    name: Dev
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -34,37 +35,40 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::319279229867:role/GitHubActions-PolicyAsCode
-          aws-region: ap-south-1
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Verify AWS identity
-        run: |
-          aws sts get-caller-identity
+        run: aws sts get-caller-identity
 
       - name: Terraform Format
         working-directory: terraform
         run: terraform fmt -check -recursive
 
+      - name: Show Backend Configuration
+        working-directory: terraform/environments/dev
+        run: |
+          echo "Backend configuration:"
+          cat backend.tf
+
       - name: Terraform Init
-        working-directory: terraform/environments/${{ matrix.environment }}
+        working-directory: terraform/environments/dev
         run: terraform init
 
       - name: Check Terraform State
-        working-directory: terraform/environments/${{ matrix.environment }}
+        working-directory: terraform/environments/dev
         run: |
-          echo "Environment: ${{ matrix.environment }}"
-          echo "Terraform state:"
+          echo "Dev Terraform state:"
           terraform state list
 
       - name: Verify Dev S3 Bucket State
-        if: matrix.environment == 'dev'
         working-directory: terraform/environments/dev
         run: |
           terraform state list | grep -q "module.infrastructure.aws_s3_bucket.this"
           echo "Dev S3 bucket is present in Terraform state."
 
       - name: Terraform Validate
-        working-directory: terraform/environments/${{ matrix.environment }}
+        working-directory: terraform/environments/dev
         run: terraform validate
 
       - name: Install Checkov
@@ -74,10 +78,128 @@ jobs:
         run: checkov -d terraform --framework terraform
 
       - name: Terraform Plan
-        working-directory: terraform/environments/${{ matrix.environment }}
+        working-directory: terraform/environments/dev
         run: terraform plan -lock=false
 
       - name: Terraform Apply
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.environment == 'dev'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         working-directory: terraform/environments/dev
         run: terraform apply -auto-approve
+
+
+  # ============================================================
+  # STAGING
+  # ============================================================
+  staging:
+    name: Staging
+    needs: dev
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity
+
+      - name: Terraform Format
+        working-directory: terraform
+        run: terraform fmt -check -recursive
+
+      - name: Show Backend Configuration
+        working-directory: terraform/environments/staging
+        run: |
+          echo "Backend configuration:"
+          cat backend.tf
+
+      - name: Terraform Init
+        working-directory: terraform/environments/staging
+        run: terraform init
+
+      - name: Check Terraform State
+        working-directory: terraform/environments/staging
+        run: |
+          echo "Staging Terraform state:"
+          terraform state list
+
+      - name: Terraform Validate
+        working-directory: terraform/environments/staging
+        run: terraform validate
+
+      - name: Install Checkov
+        run: pip install checkov==3.3.17
+
+      - name: Checkov Scan
+        run: checkov -d terraform --framework terraform
+
+      - name: Terraform Plan
+        working-directory: terraform/environments/staging
+        run: terraform plan -lock=false
+
+
+  # ============================================================
+  # PROD
+  # ============================================================
+  prod:
+    name: Prod
+    needs: staging
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity
+
+      - name: Terraform Format
+        working-directory: terraform
+        run: terraform fmt -check -recursive
+
+      - name: Show Backend Configuration
+        working-directory: terraform/environments/prod
+        run: |
+          echo "Backend configuration:"
+          cat backend.tf
+
+      - name: Terraform Init
+        working-directory: terraform/environments/prod
+        run: terraform init
+
+      - name: Check Terraform State
+        working-directory: terraform/environments/prod
+        run: |
+          echo "Prod Terraform state:"
+          terraform state list
+
+      - name: Terraform Validate
+        working-directory: terraform/environments/prod
+        run: terraform validate
+
+      - name: Install Checkov
+        run: pip install checkov==3.3.17
+
+      - name: Checkov Scan
+        run: checkov -d terraform --framework terraform
+
+      - name: Terraform Plan
+        working-directory: terraform/environments/prod
+        run: terraform plan -lock=false
