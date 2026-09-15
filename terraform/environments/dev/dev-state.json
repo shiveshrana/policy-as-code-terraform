@@ -1,0 +1,280 @@
+{
+  "version": 4,
+  "terraform_version": "1.15.8",
+  "serial": 14,
+  "lineage": "e59baf7a-9064-41f6-dca6-a85a288857db",
+  "outputs": {
+    "bucket_arn": {
+      "value": "arn:aws:s3:::policy-as-code-dev-shivesh-2026",
+      "type": "string"
+    },
+    "bucket_name": {
+      "value": "policy-as-code-dev-shivesh-2026",
+      "type": "string"
+    },
+    "security_group_id": {
+      "value": "sg-095c92c2b16f33376",
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "module": "module.infrastructure",
+      "mode": "data",
+      "type": "aws_caller_identity",
+      "name": "current",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "account_id": "319279229867",
+            "arn": "arn:aws:iam::319279229867:user/shivesh_admin",
+            "id": "319279229867",
+            "user_id": "AIDAUUVUGNOV3BWFTNW3Z"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0
+        }
+      ]
+    },
+    {
+      "module": "module.infrastructure",
+      "mode": "data",
+      "type": "aws_vpc",
+      "name": "default",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-south-1:319279229867:vpc/vpc-0008a8be3b073bb11",
+            "cidr_block": "172.31.0.0/16",
+            "cidr_block_associations": [
+              {
+                "association_id": "vpc-cidr-assoc-0e5d0b6eba7ef67b1",
+                "cidr_block": "172.31.0.0/16",
+                "state": "associated"
+              }
+            ],
+            "default": true,
+            "dhcp_options_id": "dopt-08fa7ca12ba0a6f4e",
+            "enable_dns_hostnames": true,
+            "enable_dns_support": true,
+            "enable_network_address_usage_metrics": false,
+            "filter": null,
+            "id": "vpc-0008a8be3b073bb11",
+            "instance_tenancy": "default",
+            "ipv6_association_id": "",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_associations": [],
+            "main_route_table_id": "rtb-0c2bfd2b68284d258",
+            "owner_id": "319279229867",
+            "region": "ap-south-1",
+            "state": null,
+            "tags": {
+              "Name": "Default-VPC"
+            },
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0
+        }
+      ]
+    },
+    {
+      "module": "module.infrastructure",
+      "mode": "managed",
+      "type": "aws_kms_key",
+      "name": "this",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:kms:ap-south-1:319279229867:key/e341ca91-f725-443f-ae1f-78767773f558",
+            "bypass_policy_lockout_safety_check": false,
+            "custom_key_store_id": "",
+            "customer_master_key_spec": "SYMMETRIC_DEFAULT",
+            "deletion_window_in_days": 7,
+            "description": "KMS key for dev S3 bucket",
+            "enable_key_rotation": true,
+            "id": "e341ca91-f725-443f-ae1f-78767773f558",
+            "is_enabled": true,
+            "key_id": "e341ca91-f725-443f-ae1f-78767773f558",
+            "key_usage": "ENCRYPT_DECRYPT",
+            "multi_region": false,
+            "policy": "{\"Statement\":[{\"Action\":\"kms:*\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::319279229867:root\"},\"Resource\":\"*\",\"Sid\":\"EnableRootAccountPermissions\"}],\"Version\":\"2012-10-17\"}",
+            "region": "ap-south-1",
+            "rotation_period_in_days": 365,
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "Terraform",
+              "Name": "dev-s3-kms",
+              "Project": "policy-as-code-terraform"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "Terraform",
+              "Name": "dev-s3-kms",
+              "Project": "policy-as-code-terraform"
+            },
+            "timeouts": null,
+            "xks_key_id": ""
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "identity": {
+            "account_id": "319279229867",
+            "id": "e341ca91-f725-443f-ae1f-78767773f558",
+            "region": "ap-south-1"
+          },
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "module.infrastructure.data.aws_caller_identity.current"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.infrastructure",
+      "mode": "managed",
+      "type": "aws_s3_bucket",
+      "name": "this",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "acceleration_status": "",
+            "acl": null,
+            "arn": "arn:aws:s3:::policy-as-code-dev-shivesh-2026",
+            "bucket": "policy-as-code-dev-shivesh-2026",
+            "bucket_domain_name": "policy-as-code-dev-shivesh-2026.s3.amazonaws.com",
+            "bucket_namespace": "global",
+            "bucket_prefix": "",
+            "bucket_region": "ap-south-1",
+            "bucket_regional_domain_name": "policy-as-code-dev-shivesh-2026.s3.ap-south-1.amazonaws.com",
+            "cors_rule": [],
+            "force_destroy": false,
+            "grant": [
+              {
+                "id": "a65f7a492329949c3d04472bfbc3adf3b920b7437ec4cbc449d2caff149f62e2",
+                "permissions": [
+                  "FULL_CONTROL"
+                ],
+                "type": "CanonicalUser",
+                "uri": ""
+              }
+            ],
+            "hosted_zone_id": "Z11RGJOFQNVJUP",
+            "id": "policy-as-code-dev-shivesh-2026",
+            "lifecycle_rule": [],
+            "logging": [],
+            "object_lock_configuration": [],
+            "object_lock_enabled": false,
+            "policy": "",
+            "region": "ap-south-1",
+            "replication_configuration": [],
+            "request_payer": "BucketOwner",
+            "server_side_encryption_configuration": [
+              {
+                "rule": [
+                  {
+                    "apply_server_side_encryption_by_default": [
+                      {
+                        "kms_master_key_id": "",
+                        "sse_algorithm": "AES256"
+                      }
+                    ],
+                    "bucket_key_enabled": false
+                  }
+                ]
+              }
+            ],
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "Terraform",
+              "Name": "policy-as-code-dev-shivesh-2026",
+              "Project": "policy-as-code-terraform"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "Terraform",
+              "Name": "policy-as-code-dev-shivesh-2026",
+              "Project": "policy-as-code-terraform"
+            },
+            "timeouts": null,
+            "versioning": [
+              {
+                "enabled": false,
+                "mfa_delete": false
+              }
+            ],
+            "website": [],
+            "website_domain": null,
+            "website_endpoint": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "identity": {
+            "account_id": "319279229867",
+            "bucket": "policy-as-code-dev-shivesh-2026",
+            "region": "ap-south-1"
+          },
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjM2MDAwMDAwMDAwMDAsInJlYWQiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMCJ9"
+        }
+      ]
+    },
+    {
+      "module": "module.infrastructure",
+      "mode": "managed",
+      "type": "aws_security_group",
+      "name": "this",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-south-1:319279229867:security-group/sg-095c92c2b16f33376",
+            "description": "Security group for dev",
+            "egress": [],
+            "id": "sg-095c92c2b16f33376",
+            "ingress": [],
+            "name": "dev-app-sg",
+            "name_prefix": "",
+            "owner_id": "319279229867",
+            "region": "ap-south-1",
+            "revoke_rules_on_delete": false,
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "Terraform",
+              "Name": "dev-app-sg",
+              "Project": "policy-as-code-terraform"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "Terraform",
+              "Name": "dev-app-sg",
+              "Project": "policy-as-code-terraform"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-0008a8be3b073bb11"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "identity": {
+            "account_id": "319279229867",
+            "id": "sg-095c92c2b16f33376",
+            "region": "ap-south-1"
+          },
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6OTAwMDAwMDAwMDAwfSwic2NoZW1hX3ZlcnNpb24iOiIxIn0=",
+          "dependencies": [
+            "module.infrastructure.data.aws_vpc.default"
+          ]
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}
